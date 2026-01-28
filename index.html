@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Finanzas</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#667eea">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header h1 {
+            font-size: 1.8em;
+            margin-bottom: 5px;
+        }
+
+        /* Balance Card */
+        .balance-section {
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .balance-card {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .balance-card h2 {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .balance-amount {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .balance-amount.positive { color: #2ecc71; }
+        .balance-amount.negative { color: #ff6b6b; }
+
+        .balance-details {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 15px;
+        }
+
+        .balance-item {
+            text-align: center;
+        }
+
+        .balance-item .label {
+            font-size: 0.8em;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+
+        .balance-item .amount {
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+
+        .income-amount { color: #2ecc71; }
+        .expense-amount { color: #ff6b6b; }
+
+        /* Navigation */
+        .nav-tabs {
+            display: flex;
+            background: white;
+            border-radius: 15px;
+            margin: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .nav-tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            background: none;
+            border: none;
+            font-size: 0.9em;
+            font-weight: 600;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .nav-tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        /* Sections */
+        .section {
+            display: none;
+            padding: 0 20px 20px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .card h3 {
+            margin-bottom: 15px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Transaction Type Selector */
+        .type-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .type-btn {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .type-btn.active.income {
+            background: #2ecc71;
+            color: white;
+            border-color: #2ecc71;
+        }
+
+        .type-btn.active.expense {
+            background: #e74c3c;
+            color: white;
+            border-color: #e74c3c;
+        }
+
+        /* Lists */
+        .transaction-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .transaction-info h4 {
+            color: #333;
+            margin-bottom: 3px;
+        }
+
+        .transaction-info span {
+            font-size: 0.8em;
+            color: #999;
+        }
+
+        .transaction-amount {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .transaction-amount.income { color: #2ecc71; }
+        .transaction-amount.expense { color: #e74c3c; }
+
+        .delete-btn {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-left: 10px;
+            font-size: 0.9em;
+        }
+
+        /* Shopping List */
+        .shopping-input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .shopping-input-group input {
+            flex: 1;
+        }
+
+        .shopping-input-group .btn {
+            width: auto;
+            padding: 12px 20px;
+        }
+
+        .shopping-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+            animation: slideIn 0.3s ease;
+        }
+
+        .checkbox-wrapper {
+            position: relative;
+            margin-right: 15px;
+        }
+
+        .checkbox-wrapper input[type="checkbox"] {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            opacity: 0;
+            position: absolute;
+            z-index: 2;
+        }
+
+        .custom-checkbox {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #667eea;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .checkbox-wrapper input:checked ~ .custom-checkbox {
+            background: #667eea;
+        }
+
+        .checkbox-wrapper input:checked ~ .custom-checkbox::after {
+            content: "✓";
+            color: white;
+            font-weight: bold;
+        }
+
+        .shopping-item-text {
+            flex: 1;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        .shopping-item-text.checked {
+            text-decoration: line-through;
+            color: #999;
+        }
+
+        .shopping-delete {
+            background: none;
+            border: none;
+            color: #ff6b6b;
+            font-size: 1.2em;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: #f0f0f0;
+            border-radius: 4px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #999;
+            padding: 40px;
+        }
+
+        /* Charts */
+        .chart-container {
+            margin-top: 15px;
+        }
+
+        .category-bar {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .category-label {
+            width: 100px;
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .bar-wrapper {
+            flex: 1;
+            height: 35px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 0 10px;
+        }
+
+        .bar-fill {
+            height: 100%;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            color: white;
+            font-size: 0.8em;
+            font-weight: bold;
+            transition: width 0.5s ease;
+        }
+
+        .category-value {
+            width: 70px;
+            text-align: right;
+            font-weight: bold;
+            color: #333;
+            font-size: 0.9em;
+        }
+
+        /* Bottom Nav */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        .bottom-nav-item {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            cursor: pointer;
+            color: #999;
+            transition: all 0.3s;
+            border: none;
+            background: none;
+            font-size: 0.75em;
+        }
+
+        .bottom-nav-item.active {
+            color: #667eea;
+        }
+
+        .bottom-nav-item .icon {
+            font-size: 1.5em;
+            display: block;
+            margin-bottom: 3px;
+        }
+
+        /* Install Button */
+        .install-btn {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            background: #2ecc71;
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 50px;
+            font-weight: bold;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            display: none;
+            z-index: 1000;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .install-btn.show {
+            display: block;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .stat-box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-box .number {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-box .label {
+            font-size: 0.8em;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <h1>💰 Mi Finanzas</h1>
+        <p>Control total de tu dinero</p>
+    </div>
+
+    <!-- Balance Section -->
+    <div class="balance-section">
+        <div class="balance-card">
+            <h2>Balance Total</h2>
+            <div class="balance-amount" id="balanceAmount">$0.00</div>
+            <div class="balance-details">
+                <div class="balance-item">
+                    <div class="label">Entradas</div>
+                    <div class="amount income-amount" id="totalIncome">$0</div>
+                </div>
+                <div class="balance-item">
+                    <div class="label">Salidas</div>
+                    <div class="amount expense-amount" id="totalExpense">$0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Transactions Section -->
+        <div class="section active" id="transactionsSection">
+            <div class="card">
+                <h3>📝 Nueva Transacción</h3>
+                
+                <div class="type-selector">
+                    <button class="type-btn active income" onclick="setTransactionType('income')">
+                        📥 Entrada
+                    </button>
+                    <button class="type-btn expense" onclick="setTransactionType('expense')">
+                        📤 Salida
+                    </button>
+                </div>
+
+                <div class="form-group">
+                    <label>Monto ($)</label>
+                    <input type="number" id="transAmount" placeholder="0.00" step="0.01">
+                </div>
+
+                <div class="form-group" id="categoryGroup">
+                    <label>Categoría</label>
+                    <select id="transCategory">
+                        <option value="comida">🍔 Comida</option>
+                        <option value="transporte">🚗 Transporte</option>
+                        <option value="entretenimiento">🎬 Entretenimiento</option>
+                        <option value="compras">🛍️ Compras</option>
+                        <option value="servicios">💡 Servicios</option>
+                        <option value="salud">🏥 Salud</option>
+                        <option value="ropa">👕 Ropa</option>
+                        <option value="educacion">📚 Educación</option>
+                        <option value="otros">📦 Otros</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="incomeSourceGroup" style="display: none;">
+                    <label>Fuente de ingreso</label>
+                    <select id="incomeSource">
+                        <option value="salario">💼 Salario</option>
+                        <option value="freelance">💻 Freelance</option>
+                        <option value="inversiones">📈 Inversiones</option>
+                        <option value="regalo">🎁 Regalo</option>
+                        <option value="otros">📦 Otros</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Descripción</label>
+                    <input type="text" id="transDescription" placeholder="¿En qué gastaste o de dónde vino?">
+                </div>
+
+                <button class="btn btn-primary" onclick="addTransaction()">
+                    ➕ Agregar
+                </button>
+            </div>
+
+            <div class="card">
+                <h3>📊 Resumen por Categoría</h3>
+                <div id="categoryChart">
+                    <div class="empty-state">Sin datos aún</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>📋 Historial</h3>
+                <div class="transaction-list" id="transactionList">
+                    <div class="empty-state">Sin transacciones</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Shopping List Section -->
+        <div class="section" id="shoppingSection">
+            <div class="card">
+                <h3>🛒 Lista de Mercado</h3>
+                
+                <div class="shopping-input-group">
+                    <input type="text" id="shoppingItem" placeholder="¿Qué necesitas comprar?">
+                    <button class="btn btn-primary" onclick="addShoppingItem()">➕</button>
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <span style="font-size: 0.9em; color: #666;">Progreso</span>
+                        <span style="font-size: 0.9em; color: #667eea; font-weight: bold;" id="progressText">0/0</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressBar" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div id="shoppingList">
+                    <div class="empty-state">Tu lista está vacía</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>💡 Consejo</h3>
+                <p style="color: #666; font-size: 0.9em; line-height: 1.6;">
+                    Toca el checkbox para marcar items comprados. 
+                    Los items marcados se mantienen en la lista hasta que los elimines manualmente.
+                </p>
+            </div>
+        </div>
+
+        <!-- Stats Section -->
+        <div class="section" id="statsSection">
+            <div class="card">
+                <h3>📈 Estadísticas del Mes</h3>
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="number" id="statTransactions">0</div>
+                        <div class="label">Transacciones</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="number" id="statCategories">0</div>
+                        <div class="label">Categorías usadas</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="number" id="statShopping">0</div>
+                        <div class="label">Items en lista</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="number" id="statPending">0</div>
+                        <div class="label">Pendientes</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>🎯 Mayor Gasto</h3>
+                <div id="topExpense">
+                    <div class="empty-state">Sin datos suficientes</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>💰 Mayor Entrada</h3>
+                <div id="topIncome">
+                    <div class="empty-state">Sin datos suficientes</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <button class="bottom-nav-item active" onclick="showSection('transactions')">
+            <span class="icon">💳</span>
+            <span>Transacciones</span>
+        </button>
+        <button class="bottom-nav-item" onclick="showSection('shopping')">
+            <span class="icon">🛒</span>
+            <span>Mercado</span>
+        </button>
+        <button class="bottom-nav-item" onclick="showSection('stats')">
+            <span class="icon">📊</span>
+            <span>Estadísticas</span>
+        </button>
+    </nav>
+
+    <!-- Install Button -->
+    <button class="install-btn" id="installBtn" onclick="installApp()">
+        📲 Instalar App
+    </button>
+
+    <script src="app.js"></script>
+</body>
+</html>
